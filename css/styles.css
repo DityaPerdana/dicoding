@@ -41,18 +41,15 @@ main {
     border-color: white;
 }
 
-/* Tampilan outline saat storyList mendapat fokus dari skip link */
 #storyList:focus {
     outline: 2px solid #3498db;
     outline-offset: 2px;
 }
 
-/* Default style untuk focus */
 :focus {
     outline: 2px solid #3498db;
 }
 
-/* Style untuk focus yang lebih halus pada elemen interaktif */
 button:focus,
 a:focus,
 input:focus,

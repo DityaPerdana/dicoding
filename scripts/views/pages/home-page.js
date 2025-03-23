@@ -45,10 +45,7 @@ const HomePage = {
     }
   },
 
-  hideLoading() {
-    // Tidak perlu melakukan apa-apa di sini
-    // renderStories sudah menggantikan loader
-  },
+  hideLoading() {},
 
   updateNavigation() {
     this._app.updateNavigation();
@@ -80,7 +77,6 @@ const HomePage = {
         return;
       }
 
-      // Gunakan template untuk membuat HTML item
       const storyHTML = StoryItemTemplate.createStoryItemTemplate(story);
       const storyContainer = document.createElement("div");
       storyContainer.innerHTML = storyHTML;
@@ -118,7 +114,6 @@ const HomePage = {
             </div>
           `;
 
-      // Tambahkan keyboard event listener
       storyElement.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

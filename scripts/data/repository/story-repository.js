@@ -13,7 +13,6 @@ class StoryRepository {
 
   async addStory(description, photo, lat, lon, token) {
     try {
-      // Validasi input
       if (!description || !description.trim()) {
         return {
           error: true,
@@ -28,7 +27,6 @@ class StoryRepository {
         };
       }
 
-      // Pastikan lat dan lon adalah null atau number yang valid
       const validLat =
         lat !== undefined && lat !== null && !isNaN(parseFloat(lat))
           ? parseFloat(lat)
@@ -39,7 +37,6 @@ class StoryRepository {
           ? parseFloat(lon)
           : null;
 
-      // Panggil API
       const response = await this._storyAPI.addStory(
         description,
         photo,

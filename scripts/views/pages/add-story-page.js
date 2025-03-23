@@ -64,46 +64,38 @@ const AddStoryPage = {
   async afterRender(app) {
     this._app = app;
 
-    // Check login
     if (!app.authManager.isLoggedIn()) {
       app.showAlert("Please login to share your story", "danger");
       window.location.hash = "#/login";
       return;
     }
 
-    // Initialize presenter
     this._presenter = new AddStoryPresenter({
       view: this,
       storyRepository: app.storyRepository,
       authManager: app.authManager,
     });
 
-    // Initialize UI elements
     this._form = document.getElementById("addStoryForm");
 
-    // Photo source selectors
     this._useCameraBtn = document.getElementById("useCameraBtn");
     this._uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
     this._cameraContainer = document.getElementById("cameraContainer");
     this._uploadContainer = document.getElementById("uploadContainer");
 
-    // Camera elements
     this._cameraFeed = document.getElementById("cameraFeed");
     this._captureButton = document.getElementById("captureButton");
     this._capturedPhoto = document.getElementById("capturedPhoto");
     this._retakeButton = document.getElementById("retakeButton");
 
-    // Upload elements
     this._photoUploadInput = document.getElementById("photoUploadInput");
     this._uploadPreview = document.getElementById("uploadPreview");
     this._uploadPlaceholder = document.getElementById("uploadPlaceholder");
 
-    // Location elements
     this._locationInfo = document.getElementById("locationInfo");
     this._clearLocationButton = document.getElementById("clearLocationButton");
     this._mapElement = document.getElementById("map");
 
-    // Check if essential elements exist
     if (
       !this._form ||
       !this._useCameraBtn ||
@@ -118,7 +110,6 @@ const AddStoryPage = {
       return;
     }
 
-    // Setup photo source toggle
     this._useCameraBtn.addEventListener("click", (e) => {
       e.preventDefault();
       this._useCameraBtn.classList.add("active");
@@ -137,17 +128,14 @@ const AddStoryPage = {
       this._cameraContainer.style.display = "none";
       this._photoSource = "upload";
 
-      // Stop camera if it was running
       if (app.activeCamera) {
         app.activeCamera.stopCamera();
       }
     });
 
-    // Default to camera if available
     this._photoSource = "camera";
     await this.initCamera();
 
-    // Setup file upload
     if (this._photoUploadInput) {
       this._photoUploadInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
@@ -164,11 +152,9 @@ const AddStoryPage = {
       });
     }
 
-    // Initialize map (with graceful failure for geolocation)
     try {
       const map = app.initMap(this._mapElement);
 
-      // Try to get user location, but don't block if denied
       navigator.geolocation.getCurrentPosition(
         (position) => {
           if (app.activeMap) {
@@ -188,12 +174,10 @@ const AddStoryPage = {
         },
         (error) => {
           console.error("Error getting user location:", error);
-          // Just continue without user location
         },
         { timeout: 5000 },
       );
 
-      // Map click handler
       this._mapElement.addEventListener("click", () => {
         if (app.activeMap) {
           const position = app.activeMap.getPosition();
@@ -204,7 +188,6 @@ const AddStoryPage = {
         }
       });
 
-      // Clear location button handler
       this._clearLocationButton.addEventListener("click", () => {
         if (app.activeMap) {
           app.activeMap.remove();
@@ -215,17 +198,14 @@ const AddStoryPage = {
       });
     } catch (error) {
       console.error("Error initializing map:", error);
-      // Continue without map if it fails
     }
 
-    // Form submit handler
     this._form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const description = document.getElementById("description").value;
       let photoBlob = null;
 
-      // Get photo based on source
       if (this._photoSource === "camera") {
         photoBlob = app.activeCamera ? app.activeCamera.getPhotoBlob() : null;
       } else if (this._photoSource === "upload") {
@@ -236,7 +216,6 @@ const AddStoryPage = {
         ? app.activeMap.getPosition()
         : { lat: null, lon: null };
 
-      // Use presenter to handle story submission
       await this._presenter.addStory(description, photoBlob, position);
     });
   },
@@ -251,7 +230,7 @@ const AddStoryPage = {
       ) {
         console.error("Camera elements not found");
         this._useCameraBtn.disabled = true;
-        this._uploadPhotoBtn.click(); // Switch to upload
+        this._uploadPhotoBtn.click();
         return false;
       }
 
@@ -268,7 +247,7 @@ const AddStoryPage = {
             <p>Failed to access camera. Please use the upload option instead.</p>
           </div>
         `;
-        this._uploadPhotoBtn.click(); // Switch to upload
+        this._uploadPhotoBtn.click();
         return false;
       }
 
@@ -293,27 +272,22 @@ const AddStoryPage = {
           <p>Failed to access camera. Please use the upload option instead.</p>
         </div>
       `;
-      this._uploadPhotoBtn.click(); // Switch to upload
+      this._uploadPhotoBtn.click();
       return false;
     }
   },
 
-  // View methods for presenter
   showLoading() {
     if (this._form) {
       this._form.innerHTML = '<div class="loader"></div>';
     }
   },
 
-  hideLoading() {
-    // This would be called after a successful or failed submission
-    // It's already handled by the redirect or error handling
-  },
+  hideLoading() {},
 
   showError(message) {
     this._app.showAlert(`Failed to share story: ${message}`, "danger");
 
-    // Re-render the form to allow the user to try again
     this.afterRender(this._app);
   },
 

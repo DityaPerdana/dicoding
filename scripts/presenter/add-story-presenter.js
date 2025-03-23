@@ -25,7 +25,6 @@ class AddStoryPresenter {
 
       this._view.showLoading();
 
-      // Convert to File object if it's a Blob
       let photoFile;
       if (photoInput instanceof File) {
         photoFile = photoInput;
@@ -39,7 +38,6 @@ class AddStoryPresenter {
 
       const token = this._authManager.getToken();
 
-      // Use position only if both lat and lon are available
       const lat = position && position.lat ? position.lat : null;
       const lon = position && position.lon ? position.lon : null;
 
@@ -60,7 +58,6 @@ class AddStoryPresenter {
         "success",
       );
 
-      // Redirect after successful submission
       this._view.redirectToHome();
     } catch (error) {
       console.error("Error in add story presenter:", error);

@@ -51,20 +51,16 @@ const App = {
   },
 
   async init() {
-    // Initialize API and Repository (Model layer)
     this.api = new StoryAPI("https://story-api.dicoding.dev/v1");
     this.storyRepository = new StoryRepository(this.api);
 
-    // Initialize utility services
     this.authManager = new AuthManager();
     this.notificationHelper = new NotificationHelper();
     this.activeCamera = null;
     this.activeMap = null;
 
-    // Initialize accessibility helper
     AccessibilityHelper.init();
 
-    // Test API connection
     const apiConnected = await this.testAPIConnection();
     if (!apiConnected) {
       console.error("Unable to connect to API. Check network and API status.");
@@ -78,7 +74,6 @@ const App = {
     this.updateNavigation();
     this.renderPage();
 
-    // Register event listeners
     window.addEventListener("hashchange", () => {
       this.renderPage();
     });
@@ -172,12 +167,10 @@ const App = {
     await page.afterRender(this);
 
     AccessibilityHelper.setupPageAccessibility();
-    // If this page defines a beforeLeave method, store it to call it later
     this.currentPageBeforeLeave = page.beforeLeave;
   },
 
   cleanupResources() {
-    // Call beforeLeave if it exists
     if (this.currentPageBeforeLeave) {
       this.currentPageBeforeLeave(this);
       this.currentPageBeforeLeave = null;

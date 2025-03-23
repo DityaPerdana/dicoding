@@ -37,7 +37,6 @@ class HomePresenter {
 
           if (token) {
             this._authManager.logout();
-            // Trigger navigation update in the view
             this._view.updateNavigation();
           }
 

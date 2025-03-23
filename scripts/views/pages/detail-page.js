@@ -13,14 +13,13 @@ const DetailPage = {
   async afterRender(app) {
     this._app = app;
     const url = UrlParser.parseActiveUrlWithoutCombiner();
-    const storyId = url.id; // Penting: tidak mengubah casing ID
+    const storyId = url.id;
 
     if (!storyId) {
       this.showError("Invalid story ID");
       return;
     }
 
-    // Inisialisasi presenter
     this._presenter = new DetailPresenter({
       view: this,
       storyRepository: app.storyRepository,
@@ -28,7 +27,6 @@ const DetailPage = {
     });
 
     try {
-      // Menggunakan presenter untuk menampilkan detail cerita
       await this._presenter.showStoryDetail(storyId);
     } catch (error) {
       console.error("Error in detail page:", error);
@@ -36,15 +34,12 @@ const DetailPage = {
     }
   },
 
-  // Metode untuk view - digunakan oleh presenter
   showLoading() {
     document.querySelector(".story-detail").innerHTML =
       '<div class="loader"></div>';
   },
 
-  hideLoading() {
-    // Nothing specific needed here as displayStory will replace the content
-  },
+  hideLoading() {},
 
   showError(message) {
     document.querySelector(".story-detail").innerHTML = `
@@ -100,7 +95,6 @@ const DetailPage = {
         }
       `;
 
-      // Animasi elemen
       const elements = storyDetailElement.querySelectorAll(
         ".story-detail__title, .story-detail__meta, .story-detail__image, .story-detail__description, .map-container",
       );
@@ -116,7 +110,6 @@ const DetailPage = {
         }, 10);
       });
 
-      // Inisialisasi peta jika ada lokasi
       if (story.lat && story.lon) {
         this.initializeMap(story);
       }
@@ -143,13 +136,11 @@ const DetailPage = {
         const map = this._app.initMap(mapElement, lat, lon);
         if (!map) return;
 
-        // Tambahkan marker untuk lokasi cerita
         const marker = L.marker([lat, lon]).addTo(map);
         marker.bindPopup(
           `<b>${story.name}'s Story</b><br>${story.description.substring(0, 100)}...`,
         );
 
-        // Zoom ke lokasi
         map.setView([lat, lon], 13);
       }, 300);
     } catch (error) {
@@ -167,7 +158,6 @@ const DetailPage = {
   },
 
   beforeLeave(app) {
-    // Clean up resources if needed
     if (app.activeMap) {
       app.activeMap.remove();
     }

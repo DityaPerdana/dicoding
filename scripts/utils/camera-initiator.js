@@ -8,7 +8,6 @@ class CameraInitiator {
 
   async init() {
     try {
-      // Validate elements
       if (!this.videoElement || !this.captureButton || !this.photoElement) {
         console.error("Camera elements not found");
         return false;
