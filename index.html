@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Dicoding Story - Share your stories with the Dicoding community"
+        />
+        <title>Dicoding Story</title>
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        <link rel="stylesheet" href="css/styles.css" />
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+    </head>
+    <body>
+        <a href="#storyList" class="skip-link">Skip to content</a>
+
+        <header class="app-bar">
+            <div class="app-bar__brand">
+                <h1>Dicoding Story</h1>
+            </div>
+            <button
+                id="hamburgerButton"
+                class="hamburger"
+                aria-label="navigation menu"
+            >
+                ☰
+            </button>
+            <nav id="navigationDrawer" class="app-bar__navigation">
+                <ul>
+                    <li id="homeNav" class="active"><a href="#/">Home</a></li>
+                    <li id="addStoryNav"><a href="#/add">Add Story</a></li>
+                    <li id="loginNav"><a href="#/login">Login</a></li>
+                    <li id="registerNav"><a href="#/register">Register</a></li>
+                    <li id="logoutNav" style="display: none">
+                        <a href="#" id="logoutButton">Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
+        <main id="mainContent" tabindex="-1"></main>
+
+        <footer>
+            <p>
+                © 2023 Dicoding Story - Share your stories with the Dicoding
+                community
+            </p>
+        </footer>
+
+        <script src="scripts/index.js" type="module"></script>
+    </body>
+</html>
