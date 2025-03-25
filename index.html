@@ -14,7 +14,11 @@
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
             crossorigin=""
         />
-        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="stylesheet" href="/css/styles.css" type="text/css" />
+        <link rel="manifest" href="manifest.json" />
+        <link rel="manifest" href="manifest.webmanifest" />
+        <link rel="icon" href="images/icons/dicoding.jpg" type="image/jpg" />
+        <meta name="theme-color" content="#2c3e50" />
         <script
             src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -41,6 +45,9 @@
                     <li id="addStoryNav"><a href="#/add">Add Story</a></li>
                     <li id="loginNav"><a href="#/login">Login</a></li>
                     <li id="registerNav"><a href="#/register">Register</a></li>
+                    <li id="savedStoriesNav">
+                        <a href="#/saved">Saved Stories</a>
+                    </li>
                     <li id="logoutNav" style="display: none">
                         <a href="#" id="logoutButton">Logout</a>
                     </li>
@@ -52,7 +59,7 @@
 
         <footer>
             <p>
-                © 2023 Dicoding Story - Share your stories with the Dicoding
+                © 2025 Dicoding Story - Share your stories with the Dicoding
                 community
             </p>
         </footer>

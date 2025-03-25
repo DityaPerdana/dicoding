@@ -1,5 +1,6 @@
 import UrlParser from "../../utils/url-parser.js";
 import DetailPresenter from "../../presenter/detail-presenter.js";
+import IdbUtils from "../../utils/idb-utils.js"; // tambahkan import ini
 
 const DetailPage = {
   async render() {
@@ -60,6 +61,10 @@ const DetailPage = {
     }, 3000);
   },
 
+  showNotification(message, type) {
+    this._app.showAlert(message, type);
+  },
+
   displayStory(story) {
     try {
       const storyDetailElement = document.querySelector(".story-detail");
@@ -82,6 +87,12 @@ const DetailPage = {
           </div>
           <img src="${story.photoUrl}" alt="Photo by ${story.name}" class="story-detail__image">
           <p class="story-detail__description">${story.description}</p>
+
+          <div class="story-actions">
+            <button id="saveStoryButton" class="btn btn-primary">
+              <span class="icon">📥</span> Save for Offline
+            </button>
+          </div>
         </div>
         ${
           story.lat && story.lon
@@ -95,8 +106,32 @@ const DetailPage = {
         }
       `;
 
+      // Set up save story button
+      const saveButton = document.getElementById("saveStoryButton");
+      if (saveButton) {
+        saveButton.addEventListener("click", async () => {
+          try {
+            await IdbUtils.saveStory(story);
+            this._app.showAlert("Story saved for offline reading!", "success");
+            saveButton.textContent = "Saved ✓";
+            saveButton.disabled = true;
+          } catch (error) {
+            console.error("Error saving story:", error);
+            this._app.showAlert("Failed to save story", "danger");
+          }
+        });
+
+        // Check if story is already saved
+        IdbUtils.getStory(story.id).then((savedStory) => {
+          if (savedStory) {
+            saveButton.textContent = "Saved ✓";
+            saveButton.disabled = true;
+          }
+        });
+      }
+
       const elements = storyDetailElement.querySelectorAll(
-        ".story-detail__title, .story-detail__meta, .story-detail__image, .story-detail__description, .map-container",
+        ".story-detail__title, .story-detail__meta, .story-detail__image, .story-detail__description, .map-container, .story-actions",
       );
       elements.forEach((element, index) => {
         element.style.opacity = "0";

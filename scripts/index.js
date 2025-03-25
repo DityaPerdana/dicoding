@@ -107,6 +107,7 @@ const App = {
     document.querySelector("#logoutNav").style.display = isLoggedIn
       ? "block"
       : "none";
+    document.querySelector("#savedStoriesNav").style.display = "block";
 
     const currentUrl = UrlParser.parseActiveUrlWithCombiner();
     document.querySelectorAll(".app-bar__navigation li").forEach((item) => {
@@ -121,6 +122,8 @@ const App = {
       document.querySelector("#loginNav").classList.add("active");
     } else if (currentUrl === "/register") {
       document.querySelector("#registerNav").classList.add("active");
+    } else if (currentUrl === "/saved") {
+      document.querySelector("#savedStoriesNav").classList.add("active");
     }
   },
 
@@ -129,7 +132,13 @@ const App = {
       this.cleanupResources();
 
       const url = UrlParser.parseActiveUrlWithCombiner();
-      const page = Routes[url] || Routes["/"];
+      const page = Routes[url];
+
+      // If no page matches the URL, show not found page
+      if (!page) {
+        window.location.hash = "#/not-found";
+        return;
+      }
 
       if (page.needsAuth && !this.authManager.isLoggedIn()) {
         window.location.hash = "#/login";
@@ -283,6 +292,8 @@ const App = {
     if (url.includes("/add")) return "add";
     if (url.includes("/login")) return "login";
     if (url.includes("/register")) return "register";
+    if (url.includes("/saved")) return "saved";
+    if (url.includes("/not-found")) return "not-found";
     return "unknown";
   },
 };

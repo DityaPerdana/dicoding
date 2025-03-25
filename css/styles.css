@@ -756,3 +756,78 @@ footer {
 .btn:active {
     transform: translateY(1px);
 }
+
+/* Nuevos estilos de Not Found Page */
+.not-found-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.not-found-container {
+    max-width: 600px;
+    padding: 30px;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-image {
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+.not-found-image img {
+    width: 100%;
+    height: auto;
+}
+
+.not-found-actions {
+    margin-top: 25px;
+}
+
+/* Saved Stories Page Styles */
+.saved-stories-page {
+    margin-bottom: 40px;
+}
+
+.page-description {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.saved-management {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.delete-saved-story {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+.story-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Animation for saving/deleting */
+@keyframes saved-animation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.saved-animation {
+    animation: saved-animation 0.5s ease;
+}

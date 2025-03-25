@@ -1,4 +1,4 @@
-const createStoryItemTemplate = (story) => {
+const createStoryItemTemplate = (story, showSaveButton = false) => {
   const dateObject = new Date(story.createdAt);
   const formattedDate = dateObject.toLocaleDateString("en-US", {
     year: "numeric",
@@ -14,6 +14,7 @@ const createStoryItemTemplate = (story) => {
         <p class="story-item__description">${story.description}</p>
         <p class="story-item__date">${formattedDate}</p>
         ${story.lat && story.lon ? `<p class="story-item__location">Location available</p>` : ""}
+        ${showSaveButton ? `<button class="btn btn-primary save-story-btn" data-id="${story.id}">Save for Offline</button>` : ""}
       </div>
     </article>
   `;

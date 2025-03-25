@@ -1,3 +1,5 @@
+import IdbUtils from "../utils/idb-utils.js";
+
 class HomePresenter {
   constructor({ view, storyRepository, authManager }) {
     this._view = view;
@@ -15,12 +17,35 @@ class HomePresenter {
         token ? "Token exists" : "No token",
       );
 
-      const response = await this._storyRepository.getStories(
-        token,
-        1,
-        10,
-        withLocation,
-      );
+      let response;
+      let fromCache = false;
+
+      try {
+        response = await this._storyRepository.getStories(
+          token,
+          1,
+          10,
+          withLocation,
+        );
+
+        if (!response.error && response.listStory) {
+          IdbUtils.saveStories(response.listStory);
+        }
+      } catch (networkError) {
+        console.log("Network error, trying to load from cache", networkError);
+
+        const cachedStories = await IdbUtils.getStories();
+        if (cachedStories && cachedStories.length > 0) {
+          response = {
+            error: false,
+            message: "Stories loaded from cache",
+            listStory: cachedStories,
+          };
+          fromCache = true;
+        } else {
+          throw networkError;
+        }
+      }
 
       if (response.error) {
         if (
@@ -31,13 +56,23 @@ class HomePresenter {
         ) {
           console.log("Authentication issue.");
           this._view.showNotification(
-            "Authentication issue. harap login",
+            "Authentication issue. please login",
             "info",
           );
 
           if (token) {
             this._authManager.logout();
             this._view.updateNavigation();
+          }
+
+          const cachedStories = await IdbUtils.getStories();
+          if (cachedStories && cachedStories.length > 0) {
+            this._view.renderStories(cachedStories);
+            this._view.showNotification(
+              "Showing stories from cache while offline",
+              "info",
+            );
+            return;
           }
 
           const guestResponse = await this._storyRepository.getStories(
@@ -60,6 +95,13 @@ class HomePresenter {
 
       if (!response.listStory) {
         throw new Error("No story data found in response");
+      }
+
+      if (fromCache) {
+        this._view.showNotification(
+          "You're viewing stories from cache while offline",
+          "info",
+        );
       }
 
       this._view.renderStories(response.listStory);
