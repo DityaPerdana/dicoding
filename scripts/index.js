@@ -59,6 +59,8 @@ const App = {
     this.activeCamera = null;
     this.activeMap = null;
 
+    this.notificationHelper.setupNotificationButton(this);
+
     AccessibilityHelper.init();
 
     const apiConnected = await this.testAPIConnection();
@@ -69,6 +71,46 @@ const App = {
         "danger",
       );
     }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", async () => {
+        try {
+          const registration = await navigator.serviceWorker.register("/sw.js");
+          console.log(
+            "ServiceWorker registration successful with scope: ",
+            registration.scope,
+          );
+        } catch (error) {
+          console.log("ServiceWorker registration failed: ", error);
+        }
+      });
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+
+      this.showInstallButton();
+    });
+
+    window.addEventListener("online", () => {
+      console.log("App is online");
+      document.body.classList.remove("offline");
+      this.showAlert("You're back online.", "success");
+      if (window.location.hash === "#/saved") {
+        setTimeout(() => this.renderPage(), 1000);
+      }
+    });
+
+    window.addEventListener("offline", () => {
+      console.log("App is offline");
+      document.body.classList.add("offline");
+      this.showAlert(
+        "You're offline. Available stories are limited to those you've saved.",
+        "warning",
+      );
+      window.location.hash = "#/saved";
+    });
 
     this.initializeDrawer();
     this.updateNavigation();
@@ -86,6 +128,35 @@ const App = {
         this.updateNavigation();
         window.location.hash = "#/";
       });
+  },
+
+  showInstallButton() {
+    const installButton = document.createElement("button");
+    installButton.textContent = "Install App";
+    installButton.className = "btn install-btn";
+    installButton.style.position = "fixed";
+    installButton.style.bottom = "80px";
+    installButton.style.right = "20px";
+    installButton.style.zIndex = "100";
+
+    document.body.appendChild(installButton);
+
+    installButton.addEventListener("click", async () => {
+      if (!this.deferredPrompt) return;
+
+      this.deferredPrompt.prompt();
+
+      const choiceResult = await this.deferredPrompt.userChoice;
+
+      if (choiceResult.outcome === "accepted") {
+        console.log("User accepted the install prompt");
+        installButton.remove();
+      } else {
+        console.log("User dismissed the install prompt");
+      }
+
+      this.deferredPrompt = null;
+    });
   },
 
   initializeDrawer() {
@@ -134,7 +205,6 @@ const App = {
       const url = UrlParser.parseActiveUrlWithCombiner();
       const page = Routes[url];
 
-      // If no page matches the URL, show not found page
       if (!page) {
         window.location.hash = "#/not-found";
         return;

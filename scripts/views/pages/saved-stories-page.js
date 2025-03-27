@@ -3,8 +3,15 @@ import IdbUtils from "../../utils/idb-utils.js";
 
 const SavedStoriesPage = {
   async render() {
+    const offlineMessage = !navigator.onLine
+      ? `<div class="offline-indicator">
+        <p>You are currently offline. Only saved stories are available.</p>
+      </div>`
+      : "";
+
     return `
       <div class="saved-stories-page">
+        ${offlineMessage}
         <h2 class="page-title">Saved Stories</h2>
         <p class="page-description">View and manage stories you've saved for offline reading.</p>
 
@@ -23,6 +30,12 @@ const SavedStoriesPage = {
     this._app = app;
     this._storyListElement = document.getElementById("storyList");
     this._clearAllButton = document.getElementById("clearAllSaved");
+
+    if (!navigator.onLine) {
+      document.body.classList.add("offline");
+    } else {
+      document.body.classList.remove("offline");
+    }
 
     this.showLoading();
 
@@ -83,9 +96,17 @@ const SavedStoriesPage = {
     }
 
     if (!stories || stories.length === 0) {
-      this._storyListElement.innerHTML = `
-        <p class="empty-state">No saved stories found. Save stories to view them offline!</p>
-      `;
+      const offlineMessage = !navigator.onLine
+        ? `<p class="empty-state">
+          You are offline and haven't saved any stories yet.
+          Connect to the internet to view and save stories.
+        </p>`
+        : `<p class="empty-state">
+          No saved stories found. Save stories to view them offline!
+        </p>`;
+
+      this._storyListElement.innerHTML = offlineMessage;
+
       if (this._clearAllButton) {
         this._clearAllButton.style.display = "none";
       }
@@ -107,6 +128,10 @@ const SavedStoriesPage = {
       const storyContainer = document.createElement("div");
       storyContainer.innerHTML = storyHTML;
       const storyElement = storyContainer.firstElementChild;
+
+      if (!navigator.onLine) {
+        storyElement.classList.add("offline-item");
+      }
 
       storyElement.style.opacity = "0";
       storyElement.style.transform = "translateY(20px)";
@@ -136,9 +161,17 @@ const SavedStoriesPage = {
             storyElement.remove();
 
             if (this._storyListElement.children.length === 0) {
-              this._storyListElement.innerHTML = `
-                <p class="empty-state">No saved stories found. Save stories to view them offline!</p>
-              `;
+              const offlineMessage = !navigator.onLine
+                ? `<p class="empty-state">
+                  You are offline and haven't saved any stories yet.
+                  Connect to the internet to view and save stories.
+                </p>`
+                : `<p class="empty-state">
+                  No saved stories found. Save stories to view them offline!
+                </p>`;
+
+              this._storyListElement.innerHTML = offlineMessage;
+
               if (this._clearAllButton) {
                 this._clearAllButton.style.display = "none";
               }
@@ -160,6 +193,10 @@ const SavedStoriesPage = {
         storyElement.style.transform = "translateY(0)";
       }, 10);
     });
+  },
+
+  beforeLeave(app) {
+    document.body.classList.remove("offline");
   },
 };
 

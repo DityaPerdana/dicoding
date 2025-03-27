@@ -1,4 +1,4 @@
-import IdbUtils from "../utils/idb-utils.js"; // tambahkan import ini
+import IdbUtils from "../utils/idb-utils.js";
 
 class DetailPresenter {
   constructor({ view, storyRepository, authManager }) {
@@ -15,6 +15,24 @@ class DetailPresenter {
         throw new Error("Invalid story ID");
       }
 
+      if (!navigator.onLine) {
+        console.log("Offline mode detected, trying to load from cache");
+        const cachedStory = await IdbUtils.getStory(id);
+
+        if (cachedStory) {
+          this._view.displayStory(cachedStory, true);
+          this._view.showNotification(
+            "You're offline. Viewing cached story.",
+            "info",
+          );
+          return;
+        } else {
+          throw new Error(
+            "This story isn't available offline. Please connect to the internet or view other saved stories.",
+          );
+        }
+      }
+
       const token = this._authManager.getToken();
       console.log("Fetching story details for ID:", id);
 
@@ -22,17 +40,14 @@ class DetailPresenter {
       let fromCache = false;
 
       try {
-        // Try to get from API first
         response = await this._storyRepository.getStoryDetail(id, token);
 
-        // If successful, save to IndexedDB
         if (!response.error && response.story) {
           await IdbUtils.saveStory(response.story);
         }
       } catch (networkError) {
         console.log("Network error, trying to load from cache", networkError);
 
-        // Try to get from IndexedDB if offline
         const cachedStory = await IdbUtils.getStory(id);
         if (cachedStory) {
           response = {
@@ -48,14 +63,10 @@ class DetailPresenter {
 
       if (response.error) {
         if (response.alternativeAction === "redirect-home") {
-          // Try from IndexedDB before giving up
           const cachedStory = await IdbUtils.getStory(id);
           if (cachedStory) {
-            this._view.displayStory(cachedStory);
-            this._view.showNotification(
-              "Viewing cached story while offline",
-              "info",
-            );
+            this._view.displayStory(cachedStory, true);
+            this._view.showNotification("Viewing cached story", "info");
             return;
           }
 
@@ -64,12 +75,11 @@ class DetailPresenter {
         }
 
         if (response.message === "Story not found") {
-          // Try from IndexedDB before giving up
           const cachedStory = await IdbUtils.getStory(id);
           if (cachedStory) {
-            this._view.displayStory(cachedStory);
+            this._view.displayStory(cachedStory, true);
             this._view.showNotification(
-              "Viewing cached story while offline",
+              "This story is no longer available online but found in your saved stories.",
               "info",
             );
             return;
@@ -84,17 +94,24 @@ class DetailPresenter {
       }
 
       if (!response.story) {
-        throw new Error("Story data not found in response");
+        const cachedStory = await IdbUtils.getStory(id);
+        if (cachedStory) {
+          this._view.displayStory(cachedStory, true);
+          this._view.showNotification(
+            "Error getting story from server. Viewing cached version.",
+            "warning",
+          );
+          return;
+        }
+
+        throw new Error("Story data not found");
       }
 
       if (fromCache) {
-        this._view.showNotification(
-          "Viewing cached story while offline",
-          "info",
-        );
+        this._view.showNotification("Viewing cached story", "info");
       }
 
-      this._view.displayStory(response.story);
+      this._view.displayStory(response.story, fromCache);
     } catch (error) {
       console.error("Error in detail presenter:", error);
       this._view.showError(error.message);
