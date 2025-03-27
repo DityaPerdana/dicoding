@@ -6,6 +6,14 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2c3e50",
+  "icons": [
+    {
+      "src": "/dicoding.png",
+      "sizes": "255x255",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Add New Story",
