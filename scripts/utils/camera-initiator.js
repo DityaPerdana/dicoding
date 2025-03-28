@@ -4,6 +4,7 @@ class CameraInitiator {
     this.captureButton = captureButton;
     this.photoElement = photoElement;
     this.stream = null;
+    this.facingMode = "user"; 
   }
 
   async init() {
@@ -13,9 +14,24 @@ class CameraInitiator {
         return false;
       }
 
+      return await this.startCamera();
+    } catch (error) {
+      console.error("Error initializing camera:", error);
+      return false;
+    }
+  }
+
+  async startCamera() {
+    try {
+      // Hentikan stream yang sedang berjalan jika ada
+      if (this.stream) {
+        this.stopCamera();
+      }
+
+      // Mulai stream baru dengan facingMode saat ini
       this.stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: "user",
+          facingMode: this.facingMode,
         },
       });
 
@@ -27,9 +43,15 @@ class CameraInitiator {
 
       return true;
     } catch (error) {
-      console.error("Error initializing camera:", error);
+      console.error("Error starting camera:", error);
       return false;
     }
+  }
+
+  flipCamera() {
+    this.facingMode = this.facingMode === "user" ? "environment" : "user";
+    
+    return this.startCamera();
   }
 
   capturePhoto() {
