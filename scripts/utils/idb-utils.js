@@ -74,10 +74,10 @@ const getImageFromCache = async (url) => {
       return URL.createObjectURL(imageBlob);
     }
 
-    return "/images/offline-placeholder.jpg";
+    return "/offline-placeholder.jpg";
   } catch (error) {
     console.error("Error getting image from cache:", error);
-    return "/images/offline-placeholder.jpg";
+    return "/offline-placeholder.jpg";
   }
 };
 
