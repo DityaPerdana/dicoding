@@ -10,7 +10,6 @@ const urlsToCache = [
   "./manifest.json",
   "./manifest.webmanifest",
   "./offline-placeholder.jpg",
-  "./images/offline-placeholder.jpg",
   "./scripts/routes.js",
   "./scripts/utils/url-parser.js",
   "./scripts/utils/drawer-initiator.js",
@@ -137,8 +136,8 @@ self.addEventListener("fetch", (event) => {
               event.request.url,
             );
             return (
-              caches.match("./images/offline-placeholder.jpg") ||
-              caches.match("./offline-placeholder.jpg")
+              caches.match("/offline-placeholder.jpg") ||
+              caches.match("/offline-placeholder.jpg")
             );
           });
       }),
