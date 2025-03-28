@@ -47,7 +47,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Service Worker: Caching app shell and content");
-      return cache.addAll(urlsToCache);
+      return cache.addAll(urlsToCache).catch((error) => {
+        console.error("Error caching files during install:", error);
+      });
     }),
   );
   self.skipWaiting();
@@ -76,6 +78,74 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const requestUrl = new URL(event.request.url);
+
+  // Handle static assets (CSS, JS, images) with improved caching
+  if (
+    requestUrl.pathname.startsWith("/css/") ||
+    requestUrl.pathname.startsWith("/scripts/") ||
+    requestUrl.pathname.startsWith("/images/")
+  ) {
+    event.respondWith(
+      caches.match(event.request)
+        .then((cachedResponse) => {
+          if (cachedResponse) {
+            // Return the cached version
+            return cachedResponse;
+          }
+
+          // If not in cache, try network - use the original request object instead of just the URL
+          return fetch(event.request, { cache: 'no-cache' })
+            .then((networkResponse) => {
+              if (networkResponse && networkResponse.status === 200) {
+                // Clone the response for caching
+                const responseToCache = networkResponse.clone();
+                
+                // Store in cache
+                caches.open(CACHE_NAME)
+                  .then((cache) => {
+                    cache.put(event.request, responseToCache);
+                  })
+                  .catch(err => console.error('Cache put error:', err));
+              }
+              return networkResponse;
+            })
+            .catch((error) => {
+              console.error(
+                `Service Worker: Failed to fetch resource: ${event.request.url}`,
+                error
+              );
+              
+              // Return specific response for CSS files
+              if (requestUrl.pathname.endsWith(".css")) {
+                return new Response(
+                  "/* Failed to load CSS file - Offline fallback */",
+                  { 
+                    headers: { 
+                      "Content-Type": "text/css",
+                      "Cache-Control": "no-cache" 
+                    },
+                    status: 200 
+                  }
+                );
+              }
+              
+              // For other resources
+              return new Response("Resource not available offline", {
+                status: 404,
+                headers: { "Content-Type": "text/plain" }
+              });
+            });
+        })
+        .catch(error => {
+          console.error('Cache match error:', error);
+          return new Response("Service worker cache error", { 
+            status: 500,
+            headers: { "Content-Type": "text/plain" }
+          });
+        })
+    );
+    return;
+  }
 
   if (requestUrl.hostname === "story-api.dicoding.dev") {
     event.respondWith(
@@ -139,38 +209,6 @@ self.addEventListener("fetch", (event) => {
               caches.match("/offline-placeholder.jpg") ||
               caches.match("/offline-placeholder.jpg")
             );
-          });
-      }),
-    );
-    return;
-  }
-
-  if (
-    requestUrl.pathname.startsWith("/scripts/") ||
-    requestUrl.pathname.startsWith("/css/") ||
-    requestUrl.pathname.startsWith("/images/")
-  ) {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              const responseToCache = networkResponse.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-            }
-            return networkResponse;
-          })
-          .catch(() => {
-            console.log("Failed to fetch resource:", event.request.url);
-            return new Response("Resource not available offline", {
-              status: 404,
-            });
           });
       }),
     );

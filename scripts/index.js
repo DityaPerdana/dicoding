@@ -76,7 +76,7 @@ const App = {
       window.addEventListener("load", async () => {
         try {
           const registration =
-            await navigator.serviceWorker.register("../sw.js");
+            await navigator.serviceWorker.register("/sw.js");
           console.log(
             "ServiceWorker registration successful with scope: ",
             registration.scope,
