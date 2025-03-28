@@ -138,22 +138,30 @@ const saveStories = async (stories) => {
 };
 
 const getStories = async () => {
-  const db = await openDB();
-  const transaction = db.transaction(OBJECT_STORE_NAME, "readonly");
-  const store = transaction.objectStore(OBJECT_STORE_NAME);
-  const index = store.index("createdAt");
+  try {
+    const db = await openDB();
+    const transaction = db.transaction(OBJECT_STORE_NAME, "readonly");
+    const store = transaction.objectStore(OBJECT_STORE_NAME);
+    const index = store.index("createdAt");
 
-  return new Promise((resolve, reject) => {
-    const request = index.getAll();
+    return new Promise((resolve, reject) => {
+      const request = index.getAll();
 
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
+      request.onsuccess = () => {
+        const stories = request.result.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        resolve(stories);
+      };
 
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
+      request.onerror = (event) => {
+        reject(event.target.error);
+      };
+    });
+  } catch (error) {
+    console.error("Error getting stories from IndexedDB:", error);
+    return [];
+  }
 };
 
 const getStory = async (id) => {
