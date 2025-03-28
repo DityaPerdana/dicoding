@@ -25,6 +25,9 @@ const AddStoryPage = {
                 <img id="capturedPhoto" style="display: none;">
               </div>
               <div class="camera-controls">
+                <button type="button" id="flipCameraButton" class="btn btn-secondary">
+                  <span class="flip-icon">🔄</span> Flip Camera
+                </button>
                 <button type="button" id="captureButton" class="btn">Capture Photo</button>
                 <button type="button" id="retakeButton" class="btn btn-secondary" style="display: none;">Retake</button>
               </div>
@@ -87,6 +90,7 @@ const AddStoryPage = {
     this._captureButton = document.getElementById("captureButton");
     this._capturedPhoto = document.getElementById("capturedPhoto");
     this._retakeButton = document.getElementById("retakeButton");
+    this._flipCameraButton = document.getElementById("flipCameraButton");
 
     this._photoUploadInput = document.getElementById("photoUploadInput");
     this._uploadPreview = document.getElementById("uploadPreview");
@@ -132,6 +136,31 @@ const AddStoryPage = {
         app.activeCamera.stopCamera();
       }
     });
+
+    // Event listener untuk tombol flip camera
+    if (this._flipCameraButton) {
+      this._flipCameraButton.addEventListener("click", async () => {
+        if (app.activeCamera) {
+          try {
+            this._flipCameraButton.disabled = true;
+            const flipped = await app.activeCamera.flipCamera();
+            if (flipped) {
+              this._flipCameraButton.classList.add("flipped");
+              setTimeout(() => {
+                this._flipCameraButton.classList.remove("flipped");
+              }, 500);
+            } else {
+              app.showAlert("Failed to flip camera. Try again.", "warning");
+            }
+          } catch (error) {
+            console.error("Error flipping camera:", error);
+            app.showAlert("Error flipping camera: " + error.message, "danger");
+          } finally {
+            this._flipCameraButton.disabled = false;
+          }
+        }
+      });
+    }
 
     this._photoSource = "camera";
     await this.initCamera();
@@ -251,17 +280,22 @@ const AddStoryPage = {
         return false;
       }
 
+      // Periksa apakah perangkat mendukung multiple kamera
+      this.checkCameraCapabilities();
+
       this._retakeButton.addEventListener("click", () => {
         this._capturedPhoto.style.display = "none";
         this._cameraFeed.style.display = "block";
         this._retakeButton.style.display = "none";
         this._captureButton.style.display = "block";
+        if (this._flipCameraButton) this._flipCameraButton.style.display = "block";
         this._app.activeCamera.retakePhoto();
       });
 
       this._captureButton.addEventListener("click", () => {
         this._captureButton.style.display = "none";
         this._retakeButton.style.display = "block";
+        if (this._flipCameraButton) this._flipCameraButton.style.display = "none";
       });
 
       return true;
@@ -274,6 +308,22 @@ const AddStoryPage = {
       `;
       this._uploadPhotoBtn.click();
       return false;
+    }
+  },
+
+  async checkCameraCapabilities() {
+    try {
+      // Periksa apakah perangkat memiliki lebih dari satu kamera
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      // Sembunyikan tombol flip camera jika hanya ada satu kamera
+      if (videoDevices.length <= 1 && this._flipCameraButton) {
+        this._flipCameraButton.style.display = 'none';
+      }
+    } catch (error) {
+      console.error("Error checking camera capabilities:", error);
+      // Jika gagal memeriksa, tetap tampilkan tombol flip (pengalaman pengguna yang lebih baik)
     }
   },
 

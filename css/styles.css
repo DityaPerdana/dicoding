@@ -362,6 +362,44 @@ footer {
 .camera-controls {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#flipCameraButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+#flipCameraButton .flip-icon {
+    margin-right: 5px;
+    display: inline-block;
+}
+
+#flipCameraButton.flipped {
+    animation: rotate360 0.5s ease forwards;
+}
+
+@keyframes rotate360 {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .camera-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #flipCameraButton, #captureButton, #retakeButton {
+        margin-bottom: 8px;
+    }
 }
 
 #map {
